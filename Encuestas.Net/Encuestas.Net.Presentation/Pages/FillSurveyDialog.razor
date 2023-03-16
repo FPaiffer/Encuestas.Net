@@ -1,0 +1,137 @@
+﻿@using Encuestas.Net.Models.Enums;
+@inject IRespondentService _respondentService
+@inject IRespondentResponseService _respondentResponseService
+<MudDialog>
+	<DialogContent>
+
+
+
+
+		@if (_selectedQuestion != null)
+		{
+			if (IndexValue == 0)
+			{
+				<MudTextField Label="Teclee su Nombre por favor" TextChanged="()=>IsDisabled=false"
+					  @bind-Value="_respondentDto.Name" For="@(() => _respondentDto.Name)" />
+			}
+			else
+			{
+				<h5>Pregunta @(_surveyDto.Questions.ToList().IndexOf(_selectedQuestion) + 1)</h5>
+				<h6>@_selectedQuestion.Text</h6>
+				if (_selectedQuestion.Type == DataTypeShow.CheckBox)
+				{
+					//no implementado por el momento
+				}
+				else if (_selectedQuestion.Type == DataTypeShow.RadioButtom)
+				{
+					<div class="d-flex">
+						<MudRadioGroup T="AnswerDto" SelectedOption="_selectedAnswer" SelectedOptionChanged="Changed">
+
+							@foreach (var item in _selectedQuestion.Answers)
+							{
+								<MudRadio Option="@(item)">@item.Text</MudRadio>
+							}
+						</MudRadioGroup>
+					</div>
+				}
+				else //list
+				{
+					<MudSelect Dense="true" T="AnswerDto" @bind-Value="_selectedAnswer" ToStringFunc="@converter" SelectedValuesChanged="()=>IsDisabled=false" Label="Seleccione" Variant="Variant.Text">
+						@foreach (var item in _selectedQuestion.Answers)
+						{
+							<MudSelectItem Value="@(item)" />
+						}
+					</MudSelect>
+				}
+
+			}
+		}
+		else//encuesta terminada
+		{
+			<h6>Muchas Gracias @_respondentDto.Name, Encuesta Finalizada</h6>
+		}
+
+
+
+
+
+
+	</DialogContent>
+	<DialogActions>
+		<MudButton Color="Color.Tertiary" Variant="Variant.Filled" Disabled="IsDisabled" OnClick="Submit">@ButtonText</MudButton>
+	</DialogActions>
+</MudDialog>
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		IndexValue = 0;
+		ButtonText = "Siguiente";
+		IsDisabled = true;
+		_selectedQuestion = _surveyDto.Questions.FirstOrDefault();
+		await base.OnInitializedAsync();
+	}
+	Func<AnswerDto, string> converter = p => p?.Text;
+	private int IndexValue { get; set; }
+	private bool IsDisabled { get; set; }
+	private QuestionDto _selectedQuestion { get; set; }
+	public AnswerDto _selectedAnswer { get; set; }
+	private List<RespondentResponseDto> _ListrespondentResponseDto { get; set; } = new List<RespondentResponseDto>();
+	private RespondentDto _respondentDto { get; set; } = new RespondentDto();
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	private string ButtonText { get; set; }
+	[Parameter] public SurveyDto _surveyDto { get; set; }
+
+	async Task Changed(AnswerDto selected)
+	{
+		_selectedAnswer = selected;
+		IsDisabled = false;
+	}
+	async Task Submit()
+	{
+		if (ButtonText == "Finalizar")
+		{
+			foreach (var item in _ListrespondentResponseDto)
+			{
+				var respondentResponse = await _respondentResponseService.InsertAsync(item);
+			}
+			MudDialog.Close(DialogResult.Ok(true));
+		}
+		if (IndexValue == 0)
+		{
+			_respondentDto = await _respondentService.InsertAsync(_respondentDto);
+			IsDisabled = true;
+		}
+		IndexValue++;
+		if (_selectedAnswer != null)
+		{
+			_ListrespondentResponseDto.Add(
+			new RespondentResponseDto
+				{
+					CreatedOn = DateTime.Now,
+					RespondentReferenceId = _respondentDto.Id,
+					RespondentReference = _respondentDto,
+					SurveyReferenceId = _surveyDto.Id,
+					SurveyReference = _surveyDto,
+					QuestionReferenceId = _selectedQuestion.Id,
+					QuestionReference = _selectedQuestion,
+					AnswerReferenceId = _selectedAnswer.Id,
+					AnswerReference=_selectedAnswer
+				}
+			);
+
+			_selectedQuestion = _surveyDto.Questions.FirstOrDefault(a => a.Id == _selectedAnswer.QuestionGoTo);
+			_selectedAnswer = null;
+			IsDisabled = true;
+		}
+		if (_selectedQuestion == null)
+		{
+			IsDisabled = false;
+			ButtonText = "Finalizar";
+		}
+
+	}
+	void Cancel() => MudDialog.Cancel();
+}
+<style>
+
+</style>

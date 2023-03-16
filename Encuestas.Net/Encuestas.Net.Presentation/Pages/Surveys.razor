@@ -1,0 +1,43 @@
+﻿@page "/Surveys"
+@inject IDialogService DialogService
+@inherits SurveyBase
+<PageTitle>Encuestas</PageTitle>
+
+
+@if (surveys == null)
+{
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+
+}
+else
+{
+    
+    @if (surveys.Count() > 0)
+    {
+        <h1>Encuestas</h1>
+        <MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" Size="Size.Large" Class="ma-2"/>
+        <MudDataGrid Items="@surveys" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+            <Columns>
+                <PropertyColumn  Property="x => x.Name" Title="Nombre" />
+                <PropertyColumn Property="x => x.CreatedOn" Title="Fecha Creación" />
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudButton Size="@Size.Small" Variant="@Variant.Filled" Color="@Color.Primary" OnClick="@((e) => FillSurvey(context.Item))">LLenar</MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+}
+@code  {
+    private void FillSurvey(SurveyDto surveyDto)
+    {
+          var parameters = new DialogParameters();
+        parameters.Add("_surveyDto", surveyDto);
+        DialogService.Show<FillSurveyDialog>(surveyDto.Name, parameters, new DialogOptions() { MaxWidth = MaxWidth.Small, DisableBackdropClick = true });
+    
+    }
+
+}

@@ -46,7 +46,30 @@ namespace Encuestas.Net.Application.Interfaces
             }
         }
 
-        public async Task<RespondentResponseDto> InsertAsync(RespondentResponseDto data)
+		public async Task<IEnumerable<RespondentResponseDto>> GetRespondentResponseByRespondentAsync(int RespondentId)
+		{
+			try
+			{
+				var Elements = await _respondentResponseRepository.GetAllByRespondentAsync(RespondentId);
+				if (Elements == null || Elements.Count == 0)
+					return null;
+
+				var elementsResult = new List<RespondentResponseDto>();
+				foreach (var item in Elements)
+				{
+					var itemDto = _mapper.Map<RespondentResponseDto>(item);
+					elementsResult.Add(itemDto);
+				}
+				return elementsResult;
+			}
+			catch
+			{
+				throw new Exception("ERR-02 Falla interna en el servidor");
+			}
+		}
+
+
+		public async Task<RespondentResponseDto> InsertAsync(RespondentResponseDto data)
         {
             try
             {

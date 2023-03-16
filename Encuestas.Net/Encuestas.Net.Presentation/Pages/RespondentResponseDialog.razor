@@ -1,0 +1,94 @@
+﻿@using ClosedXML.Excel;
+@using Encuestas.Net.Models.Enums;
+@inject IRespondentService _respondentService
+@inject IRespondentResponseService _respondentResponseService
+@inject IJSRuntime _jsRuntime;
+<MudDialog>
+	<DialogContent>
+		@if (_ListrespondentResponseDto != null)
+		{
+			@if (_ListrespondentResponseDto.Count() > 0)
+			{
+				<h5>Respuestas de Encuesta:  @_ListrespondentResponseDto.FirstOrDefault().SurveyReference.Name</h5>
+				@foreach (var item in _ListrespondentResponseDto)
+				{
+					<h5>Pregunta: @item.SurveyReference.Questions.FirstOrDefault(a=>a.Id==item.QuestionReferenceId).Text</h5>
+					<p>Respuesta: @item.SurveyReference.Questions.FirstOrDefault(a=>a.Id==item.QuestionReferenceId).Answers.FirstOrDefault(a=>a.Id==item.AnswerReferenceId).Text</p>
+				}
+
+				<MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileDownload" OnClick="Download" Color="Color.Tertiary">Descargar</MudButton>
+			}
+			else
+			{
+				<h5>@_respondentDto.Name No tiene Encuentas Respondidas</h5>
+			}
+		}
+	</DialogContent>
+	<DialogActions>
+		<MudButton Color="Color.Tertiary" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
+	</DialogActions>
+</MudDialog>
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		ButtonText = "Ok";
+		_ListrespondentResponseDto = await _respondentResponseService.GetRespondentResponseByRespondentAsync(_respondentDto.Id);
+		await base.OnInitializedAsync();
+	}
+	private IEnumerable<RespondentResponseDto> _ListrespondentResponseDto { get; set; }
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	private string ButtonText { get; set; }
+	[Parameter] public RespondentDto _respondentDto { get; set; }
+
+
+	async Task Download()
+	{
+		var wb = new XLWorkbook();
+
+
+		var ws = wb.Worksheets.Add($"Encuesta: {@_ListrespondentResponseDto.FirstOrDefault().SurveyReference.Name}");
+
+		ws.Cell(1, 1).Value = "Pregunta";
+		ws.Cell(1, 2).Value = "Respuesta";
+
+		var index = 1;
+		foreach (var item in _ListrespondentResponseDto)
+		{
+			index++;
+			ws.Cell(index, 1).Value = item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Text;
+			ws.Cell(index, 2).Value = item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Answers.FirstOrDefault(a => a.Id == item.AnswerReferenceId).Text;
+
+		}
+
+		MemoryStream XLSStream = new();
+		XLSStream.Position = 0;
+		wb.SaveAs(XLSStream);
+
+		var bytes = new byte[0];
+		using (var ms = new MemoryStream())
+		{
+			wb.SaveAs(ms);
+			bytes = ms.ToArray();
+		}
+
+		await SaveAs(_jsRuntime, "Encuesta" + ".xlsx", bytes);
+	}
+	async Task SaveAs(IJSRuntime js, string fileName, byte[] data)
+	{
+		await js.InvokeVoidAsync(
+			"saveAsFile",
+			fileName,
+			Convert.ToBase64String(data)
+		);
+	}
+	async Task Submit()
+	{
+
+		MudDialog.Close(DialogResult.Ok(true));
+
+	}
+	void Cancel() => MudDialog.Cancel();
+}
+<style>
+
+</style>

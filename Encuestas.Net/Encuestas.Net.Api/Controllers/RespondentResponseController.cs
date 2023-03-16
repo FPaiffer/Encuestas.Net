@@ -30,7 +30,23 @@ namespace Encuestas.Net.Api.Controllers
                 return StatusCode(500, new ResultViewModel<RespondentResponseDto>(exception.Message));
             }
         }
-        [HttpPost]
+		[HttpGet("{respondentId:int}")]
+		public async Task<IActionResult> GetAllById([FromRoute] int respondentId)
+		{
+			try
+			{
+				var elements = await _respondentResponseService.GetRespondentResponseByRespondentAsync(respondentId);
+				if (elements == null)
+					return NotFound(new ResultViewModel<RespondentResponseDto>("ERR-NF01 No se encontró ninguna Respuesta"));
+
+				return Ok(new ResultViewModel<IEnumerable<RespondentResponseDto>>(elements));
+			}
+			catch (Exception exception)
+			{
+				return StatusCode(500, new ResultViewModel<RespondentResponseDto>(exception.Message));
+			}
+		}
+		[HttpPost]
         public async Task<IActionResult> Insert(RespondentResponseDto data)
         {
             try

@@ -34,28 +34,12 @@ namespace Encuestas.Net.Domain.Entities
 		[Key, Column(Order = 2)]
 		public int SurveyReferenceId { get; set; }
 		public Survey SurveyReference { get; set; }
-		/// <summary>
-		/// Gets or sets the question reference.
-		/// </summary>
-		/// <value>
-		/// The question reference.
-		/// </value>
+
 		[Key, Column(Order = 3)]
 		public int QuestionReferenceId { get; set; }
-		/// <summary>
-		/// Gets or sets the answer reference.
-		/// </summary>
-		/// <value>
-		/// The answer reference.
-		/// </value>
-		[Key, Column(Order = 4)]
+	
 		public int AnswerReferenceId { get; set; }
-		/// <summary>
-		/// Gets or sets the created on.
-		/// </summary>
-		/// <value>
-		/// The created on.
-		/// </value>
+
 		public DateTime CreatedOn { get; set; }
 	}
 }

@@ -29,7 +29,7 @@ namespace Encuestas.Net.Domain.Entities
 		/// <value>
 		/// The questions.
 		/// </value>
-		public ICollection<Question> Questions { get; set; }
+		public ICollection<Section> Sections { get; set; }
 		/// <summary>
 		/// Gets or sets the created on.
 		/// </summary>

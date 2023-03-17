@@ -10,11 +10,29 @@
 			@if (_ListrespondentResponseDto.Count() > 0)
 			{
 				<h5>Respuestas de Encuesta:  @_ListrespondentResponseDto.FirstOrDefault().SurveyReference.Name</h5>
+
+				 PairsQuestionAnswer = new Dictionary<string, string>();
+
 				@foreach (var item in _ListrespondentResponseDto)
 				{
-					<h5>Pregunta: @item.SurveyReference.Questions.FirstOrDefault(a=>a.Id==item.QuestionReferenceId).Text</h5>
-					<p>Respuesta: @item.SurveyReference.Questions.FirstOrDefault(a=>a.Id==item.QuestionReferenceId).Answers.FirstOrDefault(a=>a.Id==item.AnswerReferenceId).Text</p>
+					if (!PairsQuestionAnswer.Any(a => a.Key == @item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Text))
+					{
+						PairsQuestionAnswer.Add(@item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Text, item.AnswerText);
+					}
+					else
+					{
+						PairsQuestionAnswer[@item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Text] +=" , "+ @item.AnswerText;
+					}
+		
+					
 				}
+				foreach (var item in PairsQuestionAnswer)
+				{
+					<h5>Pregunta: @item.Key</h5>
+					<p>Respuesta: @item.Value</p>
+				}
+
+
 
 				<MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileDownload" OnClick="Download" Color="Color.Tertiary">Descargar</MudButton>
 			}
@@ -35,6 +53,7 @@
 		_ListrespondentResponseDto = await _respondentResponseService.GetRespondentResponseByRespondentAsync(_respondentDto.Id);
 		await base.OnInitializedAsync();
 	}
+	private Dictionary<string, string> PairsQuestionAnswer;
 	private IEnumerable<RespondentResponseDto> _ListrespondentResponseDto { get; set; }
 	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
 	private string ButtonText { get; set; }
@@ -46,17 +65,17 @@
 		var wb = new XLWorkbook();
 
 
-		var ws = wb.Worksheets.Add($"Encuesta: {@_ListrespondentResponseDto.FirstOrDefault().SurveyReference.Name}");
+		var ws = wb.Worksheets.Add($"Encuesta {@_ListrespondentResponseDto.FirstOrDefault().SurveyReference.Name}");
 
 		ws.Cell(1, 1).Value = "Pregunta";
 		ws.Cell(1, 2).Value = "Respuesta";
 
 		var index = 1;
-		foreach (var item in _ListrespondentResponseDto)
+		foreach (var item in PairsQuestionAnswer)
 		{
 			index++;
-			ws.Cell(index, 1).Value = item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Text;
-			ws.Cell(index, 2).Value = item.SurveyReference.Questions.FirstOrDefault(a => a.Id == item.QuestionReferenceId).Answers.FirstOrDefault(a => a.Id == item.AnswerReferenceId).Text;
+			ws.Cell(index, 1).Value = item.Key;
+			ws.Cell(index, 2).Value = item.Value;
 
 		}
 

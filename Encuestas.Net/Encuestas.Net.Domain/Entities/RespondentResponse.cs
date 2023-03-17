@@ -38,7 +38,7 @@ namespace Encuestas.Net.Domain.Entities
 		[Key, Column(Order = 3)]
 		public int QuestionReferenceId { get; set; }
 	
-		public int AnswerReferenceId { get; set; }
+		public string AnswerText { get; set; }
 
 		public DateTime CreatedOn { get; set; }
 	}

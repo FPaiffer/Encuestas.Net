@@ -6,5 +6,6 @@ namespace Encuestas.Net.Models.Dtos
         public int Id { get; set; }
         public string Text { get; set; }
 		public int QuestionGoTo { get; set; }
+
 	}
 }

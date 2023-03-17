@@ -28,5 +28,7 @@ namespace Encuestas.Net.Domain.Entities
 		/// The question go to.
 		/// </value>
 		public int? QuestionGoTo { get; set; }
+
+		public Question QuestionOwner { get; set; }
 	}
 }

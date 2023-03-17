@@ -17,9 +17,9 @@ namespace Condomify.Infrastructure.Data.Repositories
 		{
 			var result= await Context
 				   .Set<Survey>()
-				   .Include(q => q.Sections)
-				   .ThenInclude(a=>a.Questions)
+				   .Include(q => q.Questions)
 				   .ThenInclude(a => a.Answers)
+					.Include(q => q.Questions).ThenInclude(a => a.Section)
 				   .ToListAsync();
 			return result;
 		}

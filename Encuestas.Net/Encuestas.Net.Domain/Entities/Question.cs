@@ -44,6 +44,7 @@ namespace Encuestas.Net.Domain.Entities
 		/// <value>
 		/// The answers.
 		/// </value>
+		public Section Section { get; set; }
 		public ICollection<Answer> Answers { get; set; }
 	}
 }

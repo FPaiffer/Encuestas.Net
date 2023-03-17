@@ -13,10 +13,7 @@ namespace Encuestas.Net.Models.Dtos
 		
 		public int QuestionReferenceId { get; set; }
 		public QuestionDto QuestionReference { get; set; }
-
-		public int AnswerReferenceId { get; set; }
-		public AnswerDto AnswerReference { get; set; }
-
+		public string AnswerText { get; set; }	
 		public DateTime CreatedOn { get; set; }
 	}
 }

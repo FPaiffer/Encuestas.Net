@@ -1,0 +1,41 @@
+﻿@page "/Respondent"
+@inject IDialogService DialogService
+@inherits RespondentBase
+<PageTitle>Encuestados</PageTitle>
+
+
+@if (respondents == null)
+{
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+
+}
+else
+{
+    
+    @if (respondents.Count() > 0)
+    {
+        <h1>Encuestados</h1>
+        <MudDataGrid Items="@respondents" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+            <Columns>
+                <PropertyColumn  Property="x => x.Name" Title="Nombre" />
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudButton Size="@Size.Small" Variant="@Variant.Filled" Color="@Color.Primary" OnClick="@((e) => ShowRespondentResponse(context.Item))">Ver</MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+}
+@code  {
+    private void ShowRespondentResponse(RespondentDto respondentDto)
+    {
+          var parameters = new DialogParameters();
+        parameters.Add("_respondentDto", respondentDto);
+        DialogService.Show<RespondentResponseDialog>(respondentDto.Name, parameters, new DialogOptions() { MaxWidth = MaxWidth.Small, DisableBackdropClick = true });
+    
+    }
+
+}

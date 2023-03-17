@@ -4,9 +4,6 @@
 <MudDialog>
 	<DialogContent>
 
-
-
-
 		@if (_selectedQuestion != null)
 		{
 			if (IndexValue == 0)
@@ -16,7 +13,7 @@
 			}
 			else
 			{
-				<h5>Pregunta @(_surveyDto.Questions.ToList().IndexOf(_selectedQuestion) + 1)</h5>
+				<h4>@_selectedQuestion.Section.Text</h4>
 				<h6>@_selectedQuestion.Text</h6>
 				if (_selectedQuestion.Type == DataTypeShow.CheckBox)
 				{
@@ -34,9 +31,19 @@
 						</MudRadioGroup>
 					</div>
 				}
+				else if (_selectedQuestion.Type == DataTypeShow.Decimal)
+				{
+					<div class="d-flex">
+						@foreach (var item in _selectedQuestion.Answers)
+						{
+							<MudNumericField @bind-Value="DecimalValue" TextChanged="()=>{IsDisabled=false; _selectedAnswer=item;}" Label="@item.Text" Variant="Variant.Text" Step=".1M" />
+			}
+					
+					</div>
+				}
 				else //list
 				{
-					<MudSelect Dense="true" T="AnswerDto" @bind-Value="_selectedAnswer" ToStringFunc="@converter" SelectedValuesChanged="()=>IsDisabled=false" Label="Seleccione" Variant="Variant.Text">
+					<MudSelect Dense="true" T="AnswerDto" @bind-Value="_selectedAnswer" MultiSelection="_selectedQuestion.IsMultiple" @bind-SelectedValues="options" ToStringFunc="@converter" OnOpen="()=>IsDisabled=false" Label="Seleccione" Variant="Variant.Text">
 						@foreach (var item in _selectedQuestion.Answers)
 						{
 							<MudSelectItem Value="@(item)" />
@@ -50,11 +57,6 @@
 		{
 			<h6>Muchas Gracias @_respondentDto.Name, Encuesta Finalizada</h6>
 		}
-
-
-
-
-
 
 	</DialogContent>
 	<DialogActions>
@@ -70,6 +72,8 @@
 		_selectedQuestion = _surveyDto.Questions.FirstOrDefault();
 		await base.OnInitializedAsync();
 	}
+	public decimal DecimalValue { get; set; } = 0.0m;
+	private IEnumerable<AnswerDto> options { get; set; } = new HashSet<AnswerDto>();
 	Func<AnswerDto, string> converter = p => p?.Text;
 	private int IndexValue { get; set; }
 	private bool IsDisabled { get; set; }
@@ -104,6 +108,11 @@
 		IndexValue++;
 		if (_selectedAnswer != null)
 		{
+			var ValueText = _selectedAnswer.Text;
+			if (_selectedQuestion.Type == DataTypeShow.Decimal)
+			{
+				ValueText = DecimalValue.ToString();
+			}
 			_ListrespondentResponseDto.Add(
 			new RespondentResponseDto
 				{
@@ -114,15 +123,37 @@
 					SurveyReference = _surveyDto,
 					QuestionReferenceId = _selectedQuestion.Id,
 					QuestionReference = _selectedQuestion,
-					AnswerReferenceId = _selectedAnswer.Id,
-					AnswerReference=_selectedAnswer
+					AnswerText = ValueText
 				}
 			);
-
 			_selectedQuestion = _surveyDto.Questions.FirstOrDefault(a => a.Id == _selectedAnswer.QuestionGoTo);
 			_selectedAnswer = null;
+			options = new HashSet<AnswerDto>();
 			IsDisabled = true;
 		}
+		else if (options.Count() > 0)
+		{
+			foreach (var item in options)
+			{
+				_ListrespondentResponseDto.Add(
+			new RespondentResponseDto
+				{
+					CreatedOn = DateTime.Now,
+					RespondentReferenceId = _respondentDto.Id,
+					RespondentReference = _respondentDto,
+					SurveyReferenceId = _surveyDto.Id,
+					SurveyReference = _surveyDto,
+					QuestionReferenceId = _selectedQuestion.Id,
+					QuestionReference = _selectedQuestion,
+					AnswerText = item.Text
+				}
+			);
+				_selectedAnswer = null;
+			}
+			_selectedQuestion = _surveyDto.Questions.FirstOrDefault(a => a.Id == options.FirstOrDefault().QuestionGoTo);
+			options = new HashSet<AnswerDto>();
+		}
+
 		if (_selectedQuestion == null)
 		{
 			IsDisabled = false;

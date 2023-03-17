@@ -12,5 +12,7 @@ namespace Encuestas.Net.Application.Interfaces.Contracts
 	{
         Task<RespondentResponseDto> InsertAsync(RespondentResponseDto data);
         Task<IEnumerable<RespondentResponseDto>> GetRespondentResponseAsync();
-    }
+		Task<IEnumerable<RespondentResponseDto>> GetRespondentResponseByRespondentAsync(int RespondentId);
+
+	}
 }

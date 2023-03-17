@@ -13,6 +13,17 @@ namespace Condomify.Infrastructure.Data.Repositories
         {
         }
 
+		public async Task<List<RespondentResponse>> GetAllByRespondentAsync(int RespondentId)
+		{
+			var result = await Context
+			   .Set<RespondentResponse>()
+			   .Where(a=>a.RespondentReferenceId== RespondentId)
+			   .Include(s=>s.SurveyReference)
+			   .ThenInclude(a=>a.Questions)
+			   .ToListAsync();
+			return result;
+		}
+
 		public async Task<List<RespondentResponse>> GetAllWithIncludeAsync()
 		{
 			var result= await Context

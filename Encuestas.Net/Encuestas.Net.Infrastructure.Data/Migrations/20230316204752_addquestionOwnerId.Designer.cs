@@ -4,6 +4,7 @@ using Encuestas.Net.Infrastructure.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Encuestas.Net.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230316204752_addquestionOwnerId")]
+    partial class addquestionOwnerId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,10 +67,7 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
                     b.Property<int?>("QuestionFatherId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SectionId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SurveyId")
+                    b.Property<int?>("SectionId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -83,8 +83,6 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
                     b.HasIndex("QuestionFatherId");
 
                     b.HasIndex("SectionId");
-
-                    b.HasIndex("SurveyId");
 
                     b.ToTable("Question");
                 });
@@ -129,9 +127,8 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnOrder(3);
 
-                    b.Property<string>("AnswerText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AnswerReferenceId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
@@ -154,12 +151,17 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("SurveyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SurveyId");
 
                     b.ToTable("Section");
                 });
@@ -207,19 +209,11 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("QuestionFatherId");
 
-                    b.HasOne("Encuestas.Net.Domain.Entities.Section", "Section")
+                    b.HasOne("Encuestas.Net.Domain.Entities.Section", null)
                         .WithMany("Questions")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Encuestas.Net.Domain.Entities.Survey", null)
-                        .WithMany("Questions")
-                        .HasForeignKey("SurveyId");
+                        .HasForeignKey("SectionId");
 
                     b.Navigation("QuestionFather");
-
-                    b.Navigation("Section");
                 });
 
             modelBuilder.Entity("Encuestas.Net.Domain.Entities.RespondentResponse", b =>
@@ -241,6 +235,13 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
                     b.Navigation("SurveyReference");
                 });
 
+            modelBuilder.Entity("Encuestas.Net.Domain.Entities.Section", b =>
+                {
+                    b.HasOne("Encuestas.Net.Domain.Entities.Survey", null)
+                        .WithMany("Sections")
+                        .HasForeignKey("SurveyId");
+                });
+
             modelBuilder.Entity("Encuestas.Net.Domain.Entities.Question", b =>
                 {
                     b.Navigation("Answers");
@@ -253,7 +254,7 @@ namespace Encuestas.Net.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Encuestas.Net.Domain.Entities.Survey", b =>
                 {
-                    b.Navigation("Questions");
+                    b.Navigation("Sections");
                 });
 #pragma warning restore 612, 618
         }

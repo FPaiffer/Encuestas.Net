@@ -22,6 +22,14 @@ namespace Encuestas.Net.Domain.Entities
 		/// </value>
 		[MaxLength(200)]
 		public string Text { get; set; }
+
+		/// <summary>
+		/// Gets or sets the question father.
+		/// </summary>
+		/// <value>
+		/// The question father.
+		/// </value>
+		public Question? QuestionFather { get; set; }
 		/// <summary>
 		/// Gets or sets the type.
 		/// </summary>
@@ -29,12 +37,14 @@ namespace Encuestas.Net.Domain.Entities
 		/// The type.
 		/// </value>
 		public DataTypeShow Type { get; set; }
+		public bool IsMultiple { get; set; }
 		/// <summary>
 		/// Gets or sets the answers.
 		/// </summary>
 		/// <value>
 		/// The answers.
 		/// </value>
+		public Section Section { get; set; }
 		public ICollection<Answer> Answers { get; set; }
 	}
 }

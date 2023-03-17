@@ -19,6 +19,12 @@ namespace Encuestas.Net.Applications.Mappings
 			#region Maping SurveyDto         
 			CreateMap<SurveyDto, Survey>();
 			#endregion
+			#region Maping Section         
+			CreateMap<Section, SectionDto>();
+			#endregion
+			#region Maping SectionDto         
+			CreateMap<SectionDto, Section>().ForMember(a=>a.Questions, opt => opt.Ignore());
+			#endregion
 			#region Maping Question         
 			CreateMap<Question, QuestionDto>();
 			#endregion

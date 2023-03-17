@@ -77,7 +77,7 @@ namespace Encuestas.Net.Application.Interfaces
                 Element = await _respondentResponseRepository.InsertAsync(Element);
                 return _mapper.Map<RespondentResponseDto>(Element);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw new Exception("ERR-03 Falla interna en el servidor");
             }

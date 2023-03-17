@@ -19,8 +19,7 @@ namespace Condomify.Infrastructure.Data.Repositories
 			   .Set<RespondentResponse>()
 			   .Where(a=>a.RespondentReferenceId== RespondentId)
 			   .Include(s=>s.SurveyReference)
-			   .ThenInclude(q=>q.Questions)
-			   .ThenInclude(a=>a.Answers)
+			   .ThenInclude(a=>a.Questions)
 			   .ToListAsync();
 			return result;
 		}

@@ -16,6 +16,7 @@
 		/// <summary>
 		/// The select
 		/// </summary>
-		Select = 3
+		Select = 3,
+			Decimal = 4
 	}
 }
